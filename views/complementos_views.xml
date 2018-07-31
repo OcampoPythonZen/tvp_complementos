@@ -1,0 +1,361 @@
+<odoo>
+  <data>
+      <!--FORM PARA SEGUROS VARIOS Y MEJORAS DE CLAVE Y FECHA DE NACIMIENTO Y AUTOLLENADO POR EMPLEADO-->
+
+        <record id="hr_seguros_view_form" model="ir.ui.view">
+          <field name="name">hr.seguros.view.form</field>
+          <field name="model">hr.segurosvar</field>
+          <field name="arch" type="xml">
+            <form string="Seguros del Empleado">
+              <sheet>
+                <div class="oe_title">
+                  <label for="name" class="oe_edit_only"/>
+                  <h1><field name="name" placeholder="Clave de Seguro"/></h1>
+                </div>
+                <group>
+                  <group>
+                    <field name="employee_id" on_change="onchange_employee(employee_id)"/>
+                    <field name="job_id"/>
+                  </group>
+                  <group>
+                    <field name="department_id"/>
+                  </group>
+                </group>
+                <notebook>
+                  <page string="Informacion" name="information">
+                      <group>
+                          <group name="datos_gerales_del_seguro" string="Datos Generales del Seguro">
+                              <field name="active"/>
+                              <field name="proveedor"/>
+                              <field name="tipo_de_seguro_id"/>
+                              <field name="vigencia_meses"/>
+                              <field name="tipo_de_moneda_id"/>
+                              <field name="prima_neta"/>
+                              <field name="derecho_poliza"/>
+                      </group>
+                          <group name="vigencia" string="Vigencia">
+                              <label for="fecha_inicio" string="Fecha de Incio"/>
+                              <div>
+                                  <field name="fecha_inicio" class="oe_inline"/> - <field name="fecha_vencimiento" class="oe_inline"/>
+                              </div>
+                          </group>
+                      </group>
+                      <separator string="Notas"/>
+                      <field name="notes"/>
+                  </page>
+                </notebook>
+              </sheet>
+              <div class="oe_chatter">
+                   <field name="message_follower_ids" widget="mail_followers" groups="base.group_user"/>
+                   <field name="message_ids" widget="mail_thread"/>
+              </div>
+          </form>
+      </field>
+    </record>
+
+    <record id="hr_seguros_view_tree" model="ir.ui.view">
+      <field name="name">hr.seguros.view.tree</field>
+      <field name="model">hr.segurosvar</field>
+      <field name="arch" type="xml">
+          <tree string="Seguros Varios">
+              <field name="name"/>
+              <field name="employee_id"/>
+              <field name="department_id"/>
+              <field name="job_id"/>
+              <field name="tipo_de_seguro_id"/>
+              <field name="tipo_de_moneda_id"/>
+              <field name="proveedor"/>
+              <field name="prima_neta"/>
+              <field name="derecho_poliza"/>
+              <field name="fecha_inicio"/>
+              <field name="fecha_vencimiento"/>
+          </tree>
+      </field>
+    </record>
+
+    <record id="hr_seguros_view_search" model="ir.ui.view">
+      <field name="name">hr.seguros.search</field>
+      <field name="model">hr.segurosvar</field>
+      <field name="arch" type="xml">
+           <search string="Busqueda de Seguros">
+              <field name="name" string="Seguros Varios"/>
+              <field name="employee_id"/>
+              <field name="department_id"/>
+              <field name="tipo_de_seguro_id"/>
+              <field name="tipo_de_moneda_id"/>
+              <field name="proveedor"/>
+              <group expand="0" string="Agrupar por">
+                  <filter string="Empleado" domain="[]" context="{'group_by':'employee_id'}"/>
+                  <filter string="Departamento" domain="[]" context="{'group_by':'department_id'}"/>
+                  <filter string="Tipo de Seguro" domain="[]" context="{'group_by':'tipo_de_seguro_id'}"/>
+                  <filter string="Moneda" domain="[]" context="{'group_by':'tipo_de_moneda_id'}"/>
+                  <filter string="Proveedor" domain="[]" context="{'group_by':'proveedor'}"/>
+
+              </group>
+          </search>
+      </field>
+    </record>
+
+    <record id="action_hr_seguros" model="ir.actions.act_window">
+      <field name="name">Seguros de Empleados</field>
+      <field name="res_model">hr.segurosvar</field>
+      <field name="view_type">form</field>
+      <field name="view_mode">tree,form</field>
+      <field name="domain">[('employee_id', '!=', False)]</field>
+      <field name="context">{'search_default_current':1}</field>
+      <field name="search_view_id" ref="hr_seguros_view_search"/>
+      <field name="help" type="html">
+        <p class="oe_view_nocontent_create">
+          Click aqui para agregar un Nuevo seguro de Empleado.
+        </p>
+      </field>
+    </record>
+
+    <menuitem
+      id="hr_menu_seguro"
+      name="Seguros de Empleados"
+      action="action_hr_seguros"
+      parent="hr.menu_hr_root"
+      sequence="8"
+  groups="hr.group_hr_manager"/>
+
+
+      <!--ESTE ES EL BOTON DE SEGUROS PARA EL EMPLEADO-->
+
+    <record id="act_hr_employee_2_hr_seguros" model="ir.actions.act_window">
+            <field name="name">Seguros</field>
+            <field name="res_model">hr.segurosvar</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="context">{'search_default_employee_id': [active_id], 'default_employee_id': active_id}</field>
+        </record>
+
+        <record id="hr_hr_employee_view_form5" model="ir.ui.view">
+            <field name="name">hr.hr.employee.view.form5</field>
+            <field name="model">hr.employee</field>
+            <field name="inherit_id" ref="hr.view_employee_form"/>
+            <field name="arch" type="xml">
+                <data>
+                    <xpath expr="//div[@name='button_box']" position="inside">
+                        <button name="%(act_hr_employee_2_hr_seguros)d"
+                            class="oe_stat_button"
+                            icon="fa-plus-square"
+                            type="action"
+                            groups="hr.group_hr_manager">
+                            <field name="seguros_count" widget="statinfo" string="Seguro(s)"/>
+                        </button>
+                    </xpath>
+                </data>
+            </field>
+        </record>
+
+
+      <!--ESTA ES LA VISTA DE LAS TARJETAS DE GASOLINA -->
+
+      <record id="hr_gasolina_view_form" model="ir.ui.view">
+            <field name="name">hr.gasolina.view.form</field>
+            <field name="model">hr.gasolina</field>
+            <field name="arch" type="xml">
+                <form string="Beneficio de Gasolina">
+                    <sheet>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1>
+                            <field name="name" placeholder="Numero de Tarjeta"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="employee_id" on_change="onchange_employee(employee_id)"/>
+                            <field name="job_id"/>
+                        </group>
+                        <group>
+                            <field name="department_id"/>
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <page string="Información" name="information">
+			     <group name="datos_gerales">
+                                <group name="datos_gerales_de_la _tarjeta" string="Datos Generales de la Tarjeta">
+                                    <field name="proveedor" context="{'search_default_supplier':1, 'default_supplier':1, 'default_customer':0}" domain="[('supplier','=',True)]"/>
+                                    <field name="active"/>
+                                    <field name="monto_mensual"/>
+                                    <field name="monto_anual"/>
+                                </group>
+                            </group>
+
+                            <separator string="Notas"/>
+                            <field name="notes"/>
+                        </page>
+                    </notebook>
+                    </sheet>
+                    <div class="oe_chatter">
+                         <field name="message_follower_ids" widget="mail_followers" groups="base.group_user"/>
+                         <field name="message_ids" widget="mail_thread"/>
+                    </div>
+                </form>
+            </field>
+        </record>
+
+        <record id="hr_gasolina_view_tree" model="ir.ui.view">
+            <field name="name">hr.gasolina.view.tree</field>
+            <field name="model">hr.gasolina</field>
+            <field name="arch" type="xml">
+                <tree string="Gasolina">
+                    <field name="name"/>
+                    <field name="employee_id"/>
+                    <field name="department_id"/>
+                    <field name="job_id"/>
+                    <field name="proveedor"/>
+                    <field name="monto_mensual"/>
+                    <field name="monto_anual"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="hr_tarjeta_gas_view_search" model="ir.ui.view">
+            <field name="name">hr.tarjeta.gas.search</field>
+            <field name="model">hr.gasolina</field>
+            <field name="arch" type="xml">
+                <search string="Busqueda de Tarjetas">
+                    <field name="name" string="Tarjeta de Gasolina"/>
+                    <field name="employee_id"/>
+                    <group expand="0" string="Agrupar por">
+                        <filter string="Empleado" domain="[]" context="{'group_by':'employee_id'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <record id="action_hr_gasolina" model="ir.actions.act_window">
+            <field name="name">Gasolina</field>
+            <field name="res_model">hr.gasolina</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[('employee_id', '!=', False)]</field>
+            <field name="context">{'search_default_current':1}</field>
+            <field name="search_view_id" ref="hr_tarjeta_gas_view_search"/>
+            <field name="help" type="html">
+              <p class="oe_view_nocontent_create">
+                Agrega una nueva Tarjeta de Gas.
+              </p>
+            </field>
+        </record>
+
+        <menuitem
+            id="hr_menu_gasolina"
+            name="Tarjetas de Gasolina"
+            action="action_hr_gasolina"
+            parent="hr.menu_hr_root"
+            sequence="8"
+            groups="hr.group_hr_manager"/>
+
+
+      <!--AQUI ESTA EL BOTON DE LAS TARJETAS DE GASOLINA-->
+
+      <record id="act_hr_employee_2_hr_gasolina" model="ir.actions.act_window">
+            <field name="name">Gasolina</field>
+            <field name="res_model">hr.gasolina</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="context">{'search_default_employee_id': [active_id], 'default_employee_id': active_id}</field>
+        </record>
+
+        <record id="hr_hr_employee_view_form6" model="ir.ui.view">
+            <field name="name">hr.hr.employee.view.form6</field>
+            <field name="model">hr.employee</field>
+            <field name="inherit_id" ref="hr.view_employee_form"/>
+            <field name="arch" type="xml">
+                <data>
+                    <xpath expr="//div[@name='button_box']" position="inside">
+                        <button name="%(act_hr_employee_2_hr_gasolina)d"
+                            class="oe_stat_button"
+                            icon="fa-credit-card"
+                            type="action"
+                            groups="hr.group_hr_manager">
+                            <field name="gasolina_count" widget="statinfo" string="Tarjeta(s) Gas"/>
+                        </button>
+                    </xpath>
+                </data>
+            </field>
+        </record>
+
+
+      <!--SE AGREGA DE LA CLASE TVP.EMPLEADO LA VISTA DE LOS CAMPOS ADICIONALES EN EMPLEADO.-->
+      <record id="tvp_empleado_form_view" model="ir.ui.view">
+          <field name="name">tvp.empleado.form.view</field>
+          <field name="model">hr.employee</field>
+          <field name="inherit_id" ref="hr.view_employee_form"/>
+          <field name="arch" type="xml">
+
+              <!--vamos a ocultar estos campos que no se ocupan-->
+              <field name="identification_id" position="attributes">
+                  <attribute name="invisible">1</attribute>
+              </field>
+              <field name="passport_id" position="attributes">
+                  <attribute name="invisible">1</attribute>
+              </field>
+              <field name="bank_account_id" position="attributes">
+                   <attribute name="invisible">1</attribute>
+               </field>
+
+              <!--despues se agregan los campos que se requieren-->
+              <field name="birthday" position="after">
+                  <field name="edad"/>
+              </field>
+              <field name="marital" position="after">
+                  <field name="tipo_sangre"/>
+              </field>
+              <field name="country_id" position="after">
+                  <field name="curp"/>
+                  <field name="rfc"/>
+                  <field name="nss"/>
+              </field>
+              <field name="user_id" position="after">
+                  <field name="num_empleado" />
+                  <field name="fecha_ingreso" />
+                  <field name="antiguedad"/>
+              </field>
+              <field name="address_home_id" position="after">
+                  <field name="nom_contacto"/>
+                  <field name="tel_contacto"/>
+              </field>
+          </field>
+      </record>
+
+      <record id="tvp_contract_form_view" model="ir.ui.view">
+          <field name="name">tvp.contract.form.view</field>
+          <field name="model">hr.contract</field>
+          <field name="inherit_id" ref="hr_contract.hr_contract_view_form"/>
+          <field name="arch" type="xml">
+              <!--CAMPOS NO VISIBLES PARA LA VISTA DE NO CONTRATOS-->
+              <xpath expr="/form/sheet/notebook/page[2]" position="attributes">
+                  <attribute name="invisible">1</attribute>
+              </xpath>
+              <field name="type_id" position="before">
+                  <field name="active"/>
+                  <field name="base_id"/>
+              </field>
+              <field name="job_id" position="after">
+                  <field name="nivel_id"/>
+                  <field name="compania_contratadora"/>
+              </field>
+              <field name="type_id" position="after">
+                  <field name="sueldo_bruto_mensual"/>
+                  <field name="meses_prestaciones"/>
+                  <field name="sueldo_bruto_anualp" />
+                  <field name="sueldo_bruto_mensualp" />
+              </field>
+              <field name="compania_contratadora" position="after">
+                  <field name="motivo"/>
+                  <field name="porcentaje"/>
+                  <field name="nuevo_sueldo"/>
+                  <field name="monto"/>
+                  <field name="comentarios"/>
+              </field>
+          </field>
+      </record>
+
+  </data>
+</odoo>
