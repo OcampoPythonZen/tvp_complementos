@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from odoo import models, fields, api
 from odoo.exceptions import ValidationError
-from datetime import datetime,date
+from datetime import datetime,date,time
 from dateutil.relativedelta import relativedelta
 
 class SegurosVar(models.Model):
@@ -137,6 +137,7 @@ TIPO_SANGRE_EMPLEADO=[
 class tvp_empleado(models.Model):
     _inherit='hr.employee'
 
+    active = fields.Boolean('Empleado Activo', default=True)
     curp=fields.Char(string='C.U.R.P',size=18,required=True)
     rfc=fields.Char(string='R.F.C.',size=13,required=True)
     nss=fields.Char(string='N.S.S.',size=11,required=True)
@@ -147,7 +148,7 @@ class tvp_empleado(models.Model):
 
 
     edad=fields.Char(string='Edad')
-    antiguedad = fields.Char(string='Antiguedad',size=2,readonly=True)#,compute='_cal_antiguedad'
+    antiguedad=fields.Char(string='Antiguedad')
 
     tipo_sangre=fields.Selection(TIPO_SANGRE_EMPLEADO,'Tipo de sangre',required=True)
     num_empleado=fields.Integer('Numero de empleado',required=True,size=4,help='Los numeros de empleado son de solo 4 DIGITOS.')
@@ -156,18 +157,28 @@ class tvp_empleado(models.Model):
     @api.onchange('birthday','edad')
     def calcula_edad(self):
         if self.birthday!=False:
-
             # formato_fecha="%Y-%m-%d"
-            # fecha_inicial=datetime.strptime(str(self.birthday),formato_fecha)
-            # fecha_final=datetime.strptime(str(date.today()),formato_fecha)
-            # resultado=fecha_final-fecha_inicial
-
+            # fecha_cumple=time.strptime(str(self.birthday),formato_fecha)
+            # fecha_actual=time.strptime(str(date.today()),formato_fecha)
+            # resultado=fecha_actual[0]-fecha_cumple[0]
+            # if fecha_actual[1]<fecha_cumple[1]:
+            #     resultado-=1
             año_actual=str(date.today())
             año_birthday=str(self.birthday)
             resultado=int(año_actual[0:4])-int(año_birthday[0:4])
+            if int(año_actual[5:7])<int(año_birthday[5:7]):
+                resultado-=1
             self.edad=resultado
 
-
+    @api.onchange('fecha_ingreso','antiguedad')
+    def calcula_antiguedad(self):
+        if self.fecha_ingreso!=False:
+            año_actual=str(date.today())
+            fecha_inicial=str(self.fecha_ingreso)
+            resultado = int(año_actual[0:4]) - int(fecha_inicial[0:4])
+            if int(año_actual[5:7]) < int(fecha_inicial[5:7]):
+                resultado -= 1
+            self.antiguedad=resultado
 
 
 class tvp_contract(models.Model):

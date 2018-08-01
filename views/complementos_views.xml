@@ -289,7 +289,7 @@
           <field name="inherit_id" ref="hr.view_employee_form"/>
           <field name="arch" type="xml">
 
-              <!--vamos a ocultar estos campos que no se ocupan-->
+              <!--vamos a ocultar estos campos que no se ocupan de tvp_empleado-->
               <field name="identification_id" position="attributes">
                   <attribute name="invisible">1</attribute>
               </field>
@@ -300,8 +300,9 @@
                    <attribute name="invisible">1</attribute>
                </field>
 
-              <!--despues se agregan los campos que se requieren-->
+              <!--despues se agregan los campos que se requieren de tvp_empleado-->
               <field name="birthday" position="after">
+                  <field name="active"/>
                   <field name="edad"/>
               </field>
               <field name="marital" position="after">
@@ -315,6 +316,7 @@
               <field name="user_id" position="after">
                   <field name="num_empleado" />
                   <field name="fecha_ingreso" />
+                  <field name="fecha_baja" attrs="{'invisible':[('active','=',True)]}"/>
                   <field name="antiguedad"/>
               </field>
               <field name="address_home_id" position="after">
