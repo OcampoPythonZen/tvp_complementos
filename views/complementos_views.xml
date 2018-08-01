@@ -348,7 +348,7 @@
                   <field name="sueldo_bruto_mensualp" />
               </field>
               <field name="compania_contratadora" position="after">
-                  <field name="motivo"/>
+                  <field name="motivo" attrs="{'invisible':[('active','=',True)]}"/>
                   <field name="porcentaje"/>
                   <field name="nuevo_sueldo"/>
                   <field name="monto"/>

@@ -146,12 +146,28 @@ class tvp_empleado(models.Model):
     fecha_ingreso=fields.Date('Fecha de ingreso',default=datetime.today())
 
 
-    edad=fields.Char('Edad',readonly=True)#,compute='_cal_edad'
-    antiguedad = fields.Char('Antiguedad',size=2,readonly=True)#,compute='_cal_antiguedad'
+    edad=fields.Char(string='Edad')
+    antiguedad = fields.Char(string='Antiguedad',size=2,readonly=True)#,compute='_cal_antiguedad'
 
     tipo_sangre=fields.Selection(TIPO_SANGRE_EMPLEADO,'Tipo de sangre',required=True)
     num_empleado=fields.Integer('Numero de empleado',required=True,size=4,help='Los numeros de empleado son de solo 4 DIGITOS.')
     fecha_baja=fields.Date('Fecha de baja',help='Si lo requiere llene este campo con la fecha correspondiente a la baja...')
+
+    @api.onchange('birthday','edad')
+    def calcula_edad(self):
+        if self.birthday!=False:
+
+            # formato_fecha="%Y-%m-%d"
+            # fecha_inicial=datetime.strptime(str(self.birthday),formato_fecha)
+            # fecha_final=datetime.strptime(str(date.today()),formato_fecha)
+            # resultado=fecha_final-fecha_inicial
+
+            año_actual=str(date.today())
+            año_birthday=str(self.birthday)
+            resultado=int(año_actual[0:4])-int(año_birthday[0:4])
+            self.edad=resultado
+
+
 
 
 class tvp_contract(models.Model):
