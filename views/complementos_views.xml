@@ -351,9 +351,9 @@
               </field>
               <field name="compania_contratadora" position="after">
                   <field name="motivo" attrs="{'invisible':[('active','=',True)]}"/>
-                  <field name="porcentaje"/>
-                  <field name="nuevo_sueldo"/>
-                  <field name="monto"/>
+                  <field name="porcentaje" attrs="{'invisible':[('motivo','!=','aumento'),('motivo','!=','cambio'),('motivo','!=','renovacion')]}"/>
+                  <field name="nuevo_sueldo" attrs="{'invisible':[('motivo','!=','aumento'),('motivo','!=','cambio'),('motivo','!=','renovacion')]}"/>
+                  <field name="monto" attrs="{'invisible':[('motivo','!=','recorte'),('motivo','!=','cancelacion'),('motivo','!=','vencimiento')]}"/>
                   <field name="comentarios"/>
               </field>
           </field>
