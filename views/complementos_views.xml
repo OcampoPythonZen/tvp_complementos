@@ -359,5 +359,95 @@
           </field>
       </record>
 
+      <!--MODELO DE ADICION AL EMPLEADO HR.EMPLOYEE DE ESCOLARIDAD (VISTAS)-->
+      <record id="view_employee_form_inherit" model="ir.ui.view">
+        <field name="name">hr.experience.employee.form</field>
+        <field name="model">hr.employee</field>
+        <field name="inherit_id" ref="hr.view_employee_form"/>
+        <field name="arch" type="xml">
+            <notebook position="inside">
+                <page string="Experiencia Académica" groups="hr.group_hr_user">
+                    <field name="experiencia_academica_ids" context="{'default_employee_id': active_id}">
+                        <tree string="Academic Experiences" editable="bottom">
+                            <field name="name"/>
+                            <field name="nivel_estudio"/>
+                            <field name="estado"/>
+                            <field name="escuela"/>
+                            <field name="constancia_recibida"/>
+                            <field name="notas"/>
+                        </tree>
+                    </field>
+                </page>
+            </notebook>
+        </field>
+      </record>
+
+      <record id="hr_escolaridad_view_search" model="ir.ui.view">
+        <field name="name">hr.escolaridad.search</field>
+        <field name="model">hr.escolaridad</field>
+        <field name="arch" type="xml">
+            <search string="Search Contract">
+                <field name="name" string="Escolaridad"/>
+                <field name="employee_id"/>
+                <group expand="0" string="Agrupar por">
+                    <filter string="Empleado" domain="[]" context="{'group_by':'employee_id'}"/>
+                </group>
+            </search>
+        </field>
+      </record>
+
+      <record id="hr_escolaridad_view_form" model="ir.ui.view">
+            <field name="name">hr.escolaridad.form</field>
+            <field name="model">hr.escolaridad</field>
+            <field name="arch" type="xml">
+                <form string="Escolaridad">
+                    <field name="name"/>
+                    <field name="nivel_estudio"/>
+                    <field name="estado"/>
+                    <field name="escuela"/>
+                    <field name="constancia_recibida"/>
+                    <field name="notas"/>
+                </form>
+            </field>
+        </record>
+
+        <record id="hr_escolaridad_view_tree" model="ir.ui.view">
+            <field name="name">hr.escolaridad.tree</field>
+            <field name="model">hr.escolaridad</field>
+            <field name="arch" type="xml">
+                <tree string="Escolaridad">
+                    <field name="name"/>
+                    <field name="nivel_estudio"/>
+                    <field name="estado"/>
+                    <field name="escuela"/>
+                    <field name="constancia_recibida"/>
+                    <field name="notas"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="action_hr_escolaridad" model="ir.actions.act_window">
+            <field name="name">Escolaridad</field>
+            <field name="res_model">hr.escolaridad</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[]</field>
+            <field name="context">{'search_default_current':1}</field>
+            <field name="search_view_id" ref="hr_escolaridad_view_search"/>
+            <field name="help" type="html">
+              <p class="oe_view_nocontent_create">
+                Click aqui para agregar nueva experiencia academica.
+              </p>
+            </field>
+        </record>
+
+        <menuitem
+            id="hr_menu_escolaridad"
+            name="Escolaridad"
+            action="action_hr_escolaridad"
+            parent="hr.menu_hr_root"
+            sequence="5"
+            groups="hr.group_hr_manager"/>
+
   </data>
 </odoo>

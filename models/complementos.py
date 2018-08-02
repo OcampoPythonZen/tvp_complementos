@@ -233,5 +233,44 @@ class BaseAnual(models.Model):
     notas = fields.Char(string='Notas')
 
 
+GRADO_ESTUDIOS_ESCOLARIDAD=[
+    ('P1','Preescolar'),
+    ('P2','Primaria'),
+    ('S1','Secundaria'),
+    ('P3','Preparatoria'),
+    ('M1','Media Superior'),
+    ('S2','Superior'),
+    ('M2','Maestria'),
+    ('D','Doctorado'),
+    ]
+
+ESTADO_ESTUDIOS_ESCOLARIDAD=[
+    ('I','Inscrito'),
+    ('C','Cursando'),
+    ('F','Finalizado'),
+    ]
+
+class Employee(models.Model):
+
+    _inherit = "hr.employee"
+
+    experiencia_academica_ids = fields.One2many('hr.escolaridad', 'employee_id', 'Experiencia Académica', help="Experiencia Académica")
+
+
+class Escolaridad(models.Model):
+
+    _name = 'hr.escolaridad'
+    _description = 'Escolaridad del Empleado'
+
+    name = fields.Char(string='Nombre del Estudio', required=True)
+    employee_id = fields.Many2one('hr.employee', string='Empleado', required=True)
+
+    nivel_estudio = fields.Selection(GRADO_ESTUDIOS_ESCOLARIDAD, string='Nivel de Estudios')
+    estado = fields.Selection(ESTADO_ESTUDIOS_ESCOLARIDAD, string='Estado de Estudios')
+
+    escuela = fields.Char(string='Nombre de la Escuela')
+    constancia_recibida = fields.Char(string='Constancia Recibida')
+    notas = fields.Char('Notas')
+
 
 
