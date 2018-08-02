@@ -401,12 +401,17 @@
             <field name="model">hr.escolaridad</field>
             <field name="arch" type="xml">
                 <form string="Escolaridad">
-                    <field name="name"/>
-                    <field name="nivel_estudio"/>
-                    <field name="estado"/>
-                    <field name="escuela"/>
-                    <field name="constancia_recibida"/>
-                    <field name="notas"/>
+                <sheet>
+                    <group>
+                        <field name="employee_id"/>
+                        <field name="name" placeholder="Nombre o tipo de estudio (escolaridad)..."/>
+                        <field name="nivel_estudio"/>
+                        <field name="estado"/>
+                        <field name="escuela"/>
+                        <field name="constancia_recibida"/>
+                        <field name="notas"/>
+                    </group>
+                </sheet>
                 </form>
             </field>
         </record>
@@ -416,11 +421,10 @@
             <field name="model">hr.escolaridad</field>
             <field name="arch" type="xml">
                 <tree string="Escolaridad">
+                    <field name="employee_id"/>
                     <field name="name"/>
                     <field name="nivel_estudio"/>
                     <field name="estado"/>
-                    <field name="escuela"/>
-                    <field name="constancia_recibida"/>
                     <field name="notas"/>
                 </tree>
             </field>
