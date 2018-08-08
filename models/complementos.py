@@ -4,6 +4,21 @@ from odoo.exceptions import ValidationError
 from datetime import datetime,date,time
 from dateutil.relativedelta import relativedelta
 
+
+
+MONEDA_SEGUROS_SEGUROS_VARIOS=[
+    ('MXN','Moneda Nacional'),
+    ('DLL','Dolares'),
+    ('E','Euros'),
+    ]
+
+TIPO_SEGURO_SEGUROS_VARIOS=[
+    ('SV','Vida'),
+    ('SGM','Gastos Medicos Mayores'),
+    ('SDV','Viaje'),
+    ('OS','Otro Seguro')
+    ]
+
 class SegurosVar(models.Model):
     _name = 'hr.segurosvar'
     _inherit = ['mail.thread']
@@ -19,9 +34,8 @@ class SegurosVar(models.Model):
     employee_id = fields.Many2one('hr.employee', "Empleado", required=True, track_visibility='onchange')
     department_id = fields.Many2one('hr.department', string="Departamento", track_visibility='onchange')
     job_id = fields.Many2one('hr.job', 'Puesto', track_visibility='onchange')
-    tipo_de_seguro_id = fields.Many2one('tipo.seguro', ondelete='restrict', string="Tipo de Seguro",
-                                        track_visibility='onchange', index=True)
-    tipo_de_moneda_id = fields.Many2one('moneda.seguro', ondelete='restrict', string="Moneda del Seguro",
+    tipo_de_seguro_id = fields.Selection(TIPO_SEGURO_SEGUROS_VARIOS, string="Tipo de Seguro")
+    tipo_de_moneda_id = fields.Selection(MONEDA_SEGUROS_SEGUROS_VARIOS, string="Moneda del Seguro",
                                         track_visibility='onchange', index=True)
     prima_neta = fields.Float('Prima Neta', help="Monto Mensual de la tarjeta", track_visibility='onchange')
     derecho_poliza = fields.Float('Derecho de Poliza', help="Monto Anual de la tarjeta", track_visibility='onchange')
@@ -42,16 +56,6 @@ class SegurosVar(models.Model):
             self.department_id = self.employee_id.department_id
             self.resource_calendar_id = self.employee_id.resource_calendar_id
 
-
-class TipoSeguro(models.Model):
-    _name = 'tipo.seguro'
-    name = fields.Char(string='Tipo de Seguro')
-    notas = fields.Char(string='Notas')
-
-class MonedaSeguro(models.Model):
-    _name = 'moneda.seguro'
-    name = fields.Char(string='Tipo de Moneda')
-    notas = fields.Char(string='Notas')
 
 
 class Employee(models.Model):
@@ -91,7 +95,7 @@ class hr_gasolina(models.Model):
     monto_anual = fields.Float('Monto Anual', help="Monto Anual de la tarjeta", track_visibility='onchange')
     proveedor = fields.Many2one('res.partner', string='Proveedor', track_visibility='onchange')
     active = fields.Boolean('Tarjeta Activa', track_visibility='onchange', default=True)
-    notes = fields.Text('Notas')
+    notes = fields.Text('Notas',track_visibility='onchange')
 
     @api.onchange('employee_id')
     def _onchange_employee_id(self):
@@ -147,10 +151,12 @@ class tvp_empleado(models.Model):
     fecha_ingreso=fields.Date('Fecha de ingreso',default=datetime.today())
 
 
-    edad=fields.Char(string='Edad')
-    antiguedad=fields.Char(string='Antiguedad')
+    edad=fields.Char(string='Edad',readonly=True)
+    antiguedad=fields.Char(string='Antiguedad',readonly=True)
+    antiguedad_inactive=fields.Char(string='Inactivo, antiguedad',readonly=True)
 
-    tipo_sangre=fields.Selection(TIPO_SANGRE_EMPLEADO,'Tipo de sangre',required=True)
+
+    tipo_sangre=fields.Selection(TIPO_SANGRE_EMPLEADO,'Tipo de sangre')
     num_empleado=fields.Integer('Numero de empleado',required=True,size=4,help='Los numeros de empleado son de solo 4 DIGITOS.')
     fecha_baja=fields.Date('Fecha de baja',help='Si lo requiere llene este campo con la fecha correspondiente a la baja...')
 
@@ -180,15 +186,27 @@ class tvp_empleado(models.Model):
                 resultado -= 1
             self.antiguedad=resultado
 
+    @api.onchange('antiguedad_inactive','fecha_ingreso','fecha_baja')
+    def calc_fecha_final_antiguedad(self):
+        if self.fecha_ingreso!=False and self.fecha_baja!=False:
+            año_actual=str(self.fecha_baja)
+            fecha_inicial=str(self.fecha_ingreso)
+            resultado = int(año_actual[0:4]) - int(fecha_inicial[0:4])
+            if int(año_actual[5:7]) < int(fecha_inicial[5:7]):
+                resultado -= 1
+            self.antiguedad_inactive=resultado
+
+
+
 
 class tvp_contract(models.Model):
     _inherit = "hr.contract"
 
     active = fields.Boolean('Contrato Activo', default=True)
-    meses_prestaciones = fields.Float('Prestaciones en Meses', help="Meses de Bonificación al Año según Nivel")
-    sueldo_bruto_mensual = fields.Float('Sueldo Bruto Mensual')
-    sueldo_bruto_anualp = fields.Float('SBA con Prestaciones', help="Sueldo Bruto anual con Prestaciones")
-    sueldo_bruto_mensualp = fields.Float('SBM con Prestaciones', help="Sueldo Bruto Mensual con Prestaciones")
+    meses_prestaciones = fields.Float('Prestaciones en Meses', help="Meses de Bonificación al Año según Nivel",track_visibility='onchange')
+    sueldo_bruto_mensual = fields.Float('Sueldo Bruto Mensual',track_visibility='onchange')
+    sueldo_bruto_anualp = fields.Float('SBA con Prestaciones', help="Sueldo Bruto anual con Prestaciones",track_visibility='onchange')
+    sueldo_bruto_mensualp = fields.Float('SBM con Prestaciones', help="Sueldo Bruto Mensual con Prestaciones",track_visibility='onchange')
     nivel_id = fields.Many2one('nivel.nivel', ondelete='restrict', string="Nivel del Puesto", index=True)
     base_id = fields.Many2one('base.anual', ondelete='restrict', string="Base Anual", index=True)
     compania_contratadora = fields.Many2one('res.company', ondelete='restrict', string="Empresa", index=True)
@@ -198,10 +216,10 @@ class tvp_contract(models.Model):
                                ('vencimiento', 'Vencimiento de Contrato'),
                                ('recorte', 'Recorte de Personal'),
                                ('cancelacion', 'Cancelación de Contrato')],string='Motivo')
-    porcentaje = fields.Float(string='Porcentaje Aumentado', help="Porcentaje Aumentado")
-    nuevo_sueldo = fields.Float(string='Nuevo SBM', help="Nuevo Sueldo Bruto Mensual que recibirá el empleado")
-    monto = fields.Float(string='Monto Finiquitado', help="Monto entregado como liquidación o finiquito del contrato")
-    comentarios = fields.Char(string='Comentarios')
+    porcentaje = fields.Float(string='Porcentaje Aumentado', help="Porcentaje Aumentado",track_visibility='onchange')
+    nuevo_sueldo = fields.Float(string='Nuevo SBM', help="Nuevo Sueldo Bruto Mensual que recibirá el empleado",track_visibility='onchange')
+    monto = fields.Float(string='Monto Finiquitado', help="Monto entregado como liquidación o finiquito del contrato",track_visibility='onchange')
+    comentarios = fields.Char(string='Comentarios',track_visibility='onchange')
 
     @api.onchange('sueldo_bruto_mensual')
     def calcular_onchange(self):
@@ -257,6 +275,14 @@ class Employee(models.Model):
     experiencia_academica_ids = fields.One2many('hr.escolaridad', 'employee_id', 'Experiencia Académica', help="Experiencia Académica")
 
 
+CONSTANCIA_ESCOLARIDAD=[
+    ('D','Diploma'),
+    ('C1','Certificado'),
+    ('C2','Cedula'),
+    ('C3','Constancia'),
+    ('T','En tramite...'),
+    ]
+
 class Escolaridad(models.Model):
 
     _name = 'hr.escolaridad'
@@ -269,8 +295,5 @@ class Escolaridad(models.Model):
     estado = fields.Selection(ESTADO_ESTUDIOS_ESCOLARIDAD, string='Estado de Estudios')
 
     escuela = fields.Char(string='Nombre de la Escuela')
-    constancia_recibida = fields.Char(string='Constancia Recibida')
+    constancia_recibida = fields.Selection(CONSTANCIA_ESCOLARIDAD,string='Constancia Recibida')
     notas = fields.Char('Notas')
-
-
-

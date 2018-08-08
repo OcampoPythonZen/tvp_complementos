@@ -41,7 +41,7 @@
                           </group>
                       </group>
                       <separator string="Notas"/>
-                      <field name="notes"/>
+                      <field name="notes" placeholder="Si eliges otro seguro especifica CUAL..."/>
                   </page>
                 </notebook>
               </sheet>
@@ -299,6 +299,12 @@
               <field name="bank_account_id" position="attributes">
                    <attribute name="invisible">1</attribute>
                </field>
+              <field name="work_location" position="attributes">
+                   <attribute name="invisible">1</attribute>
+               </field>
+              <field name="job_id" position="replace">
+                  <field name="job_id" domain="[('department_id', '=', department_id)]"/>
+              </field>
 
               <!--despues se agregan los campos que se requieren de tvp_empleado-->
               <field name="birthday" position="after">
@@ -318,6 +324,7 @@
                   <field name="fecha_ingreso" />
                   <field name="fecha_baja" attrs="{'invisible':[('active','=',True)]}"/>
                   <field name="antiguedad"/>
+                  <field name="antiguedad_inactive" attrs="{'invisible':[('active','=',True)]}"/>
               </field>
               <field name="address_home_id" position="after">
                   <field name="nom_contacto"/>
