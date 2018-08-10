@@ -4,8 +4,6 @@ from odoo.exceptions import ValidationError
 from datetime import datetime,date,time
 from dateutil.relativedelta import relativedelta
 
-
-
 MONEDA_SEGUROS_SEGUROS_VARIOS=[
     ('MXN','Moneda Nacional'),
     ('DLL','Dolares'),
@@ -19,6 +17,41 @@ TIPO_SEGURO_SEGUROS_VARIOS=[
     ('OS','Otro Seguro')
     ]
 
+TIPO_SANGRE_EMPLEADO=[
+    ('O-','O Negativo'),
+    ('O+','O Positivo'),
+    ('A-','A Negativo'),
+    ('A+','A Positivo'),
+    ('B-','B Negativo'),
+    ('B+','B Positivo'),
+    ('AB-','AB Negativo'),
+    ('AB+','AB Positivo'),
+    ]
+
+GRADO_ESTUDIOS_ESCOLARIDAD=[
+    ('P1','Preescolar'),
+    ('P2','Primaria'),
+    ('S1','Secundaria'),
+    ('P3','Preparatoria'),
+    ('M1','Media Superior'),
+    ('S2','Superior'),
+    ('M2','Maestria'),
+    ('D','Doctorado'),
+    ]
+
+ESTADO_ESTUDIOS_ESCOLARIDAD=[
+    ('I','Inscrito'),
+    ('C','Cursando'),
+    ('F','Finalizado'),
+    ]
+
+CONSTANCIA_ESCOLARIDAD=[
+    ('D','Diploma'),
+    ('C1','Certificado'),
+    ('C2','Cedula'),
+    ('C3','Constancia'),
+    ('T','En tramite...'),
+    ]
 class SegurosVar(models.Model):
     _name = 'hr.segurosvar'
     _inherit = ['mail.thread']
@@ -57,15 +90,12 @@ class SegurosVar(models.Model):
             self.resource_calendar_id = self.employee_id.resource_calendar_id
 
 
-
 class Employee(models.Model):
-
     _inherit = "hr.employee"
 
     seguros_ids = fields.One2many('hr.segurosvar', 'employee_id', string='Seguros')
     seguros_id = fields.Many2one('hr.segurosvar', compute='_compute_seguros_id', string='Seguros Actuales', help='Último seguro del empleado')
     seguros_count = fields.Integer(compute='_compute_seguros_count', string='Seguros')
-
 
     def _compute_seguros_id(self):
         """ get the lastest seguro """
@@ -80,12 +110,10 @@ class Employee(models.Model):
         for employee in self:
             employee.seguros_count = result.get(employee.id, 0)
 
-
 #--------------------------------------Segunda class de tarjetas de Gasolina ----------------------------------
 class hr_gasolina(models.Model):
     _name = 'hr.gasolina'
     _inherit = ['mail.thread']
-
 
     name = fields.Char('No. de Tarjeta', required=True,size=12)
     employee_id = fields.Many2one('hr.employee', "Empleado", track_visibility='onchange', required=True)
@@ -110,12 +138,10 @@ class hr_gasolina(models.Model):
 
 
 class Employee(models.Model):
-
     _inherit = "hr.employee"
 
     gasolina_ids = fields.One2many('hr.gasolina', 'employee_id', string='Gasolina')
     gasolina_count = fields.Integer(compute='_compute_gasolina_count', string='Gasolina')
-
 
     def _compute_gasolina_count(self):
         # read_group as sudo, since gasolina count is displayed on form view
@@ -125,18 +151,7 @@ class Employee(models.Model):
             employee.gasolina_count = result.get(employee.id, 0)
 
 
-#CLASE DE TVP.EMPLEADO PARA AGREGAR LOS CAMPOS A LA VISTA DE EMPLEADOS
-
-TIPO_SANGRE_EMPLEADO=[
-    ('O-','O Negativo'),
-    ('O+','O Positivo'),
-    ('A-','A Negativo'),
-    ('A+','A Positivo'),
-    ('B-','B Negativo'),
-    ('B+','B Positivo'),
-    ('AB-','AB Negativo'),
-    ('AB+','AB Positivo'),
-]
+#CLASE DE TVP.EMPLEADO PARA AGREGAR LOS CAMPOS A LA VISTA DE EMPLEADOS-------------------------------------
 
 class tvp_empleado(models.Model):
     _inherit='hr.employee'
@@ -145,17 +160,12 @@ class tvp_empleado(models.Model):
     curp=fields.Char(string='C.U.R.P',size=18,required=True)
     rfc=fields.Char(string='R.F.C.',size=13,required=True)
     nss=fields.Char(string='N.S.S.',size=11,required=True)
-
     nom_contacto=fields.Char('Nombre del contacto')
     tel_contacto=fields.Char('Tel. de contacto',size=10)
     fecha_ingreso=fields.Date('Fecha de ingreso',default=datetime.today())
-
-
     edad=fields.Char(string='Edad',readonly=True)
     antiguedad=fields.Char(string='Antiguedad',readonly=True)
     antiguedad_inactive=fields.Char(string='Inactivo, antiguedad',readonly=True)
-
-
     tipo_sangre=fields.Selection(TIPO_SANGRE_EMPLEADO,'Tipo de sangre')
     num_empleado=fields.Integer('Numero de empleado',required=True,size=4,help='Los numeros de empleado son de solo 4 DIGITOS.')
     fecha_baja=fields.Date('Fecha de baja',help='Si lo requiere llene este campo con la fecha correspondiente a la baja...')
@@ -196,9 +206,7 @@ class tvp_empleado(models.Model):
                 resultado -= 1
             self.antiguedad_inactive=resultado
 
-
-
-
+#---------------------CLASE PARA MODIFICACINO DE CONTRATOS--------------------------------------------------------
 class tvp_contract(models.Model):
     _inherit = "hr.contract"
 
@@ -251,49 +259,21 @@ class BaseAnual(models.Model):
     notas = fields.Char(string='Notas')
 
 
-GRADO_ESTUDIOS_ESCOLARIDAD=[
-    ('P1','Preescolar'),
-    ('P2','Primaria'),
-    ('S1','Secundaria'),
-    ('P3','Preparatoria'),
-    ('M1','Media Superior'),
-    ('S2','Superior'),
-    ('M2','Maestria'),
-    ('D','Doctorado'),
-    ]
-
-ESTADO_ESTUDIOS_ESCOLARIDAD=[
-    ('I','Inscrito'),
-    ('C','Cursando'),
-    ('F','Finalizado'),
-    ]
 
 class Employee(models.Model):
-
     _inherit = "hr.employee"
 
     experiencia_academica_ids = fields.One2many('hr.escolaridad', 'employee_id', 'Experiencia Académica', help="Experiencia Académica")
 
-
-CONSTANCIA_ESCOLARIDAD=[
-    ('D','Diploma'),
-    ('C1','Certificado'),
-    ('C2','Cedula'),
-    ('C3','Constancia'),
-    ('T','En tramite...'),
-    ]
-
+#----------------------------------MODELO CLASS ESCOLARIDAD PARA LA VISTA DE EMPLEADO------------------------------------------
 class Escolaridad(models.Model):
-
     _name = 'hr.escolaridad'
     _description = 'Escolaridad del Empleado'
 
     name = fields.Char(string='Nombre del Estudio', required=True)
     employee_id = fields.Many2one('hr.employee', string='Empleado', required=True)
-
     nivel_estudio = fields.Selection(GRADO_ESTUDIOS_ESCOLARIDAD, string='Nivel de Estudios')
     estado = fields.Selection(ESTADO_ESTUDIOS_ESCOLARIDAD, string='Estado de Estudios')
-
     escuela = fields.Char(string='Nombre de la Escuela')
     constancia_recibida = fields.Selection(CONSTANCIA_ESCOLARIDAD,string='Constancia Recibida')
     notas = fields.Char('Notas')
