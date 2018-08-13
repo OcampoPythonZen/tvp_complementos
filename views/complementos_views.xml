@@ -323,7 +323,7 @@
                   <field name="num_empleado" />
                   <field name="fecha_ingreso" />
                   <field name="fecha_baja" attrs="{'invisible':[('active','=',True)]}"/>
-                  <field name="antiguedad"/>
+                  <field name="antiguedad" attrs="{'invisible':[('active','=',False)]}"/>
                   <field name="antiguedad_inactive" attrs="{'invisible':[('active','=',True)]}"/>
               </field>
               <field name="address_home_id" position="after">
@@ -419,6 +419,10 @@
                         <field name="notas"/>
                     </group>
                 </sheet>
+                    <div class="oe_chatter">
+                       <field name="message_follower_ids" widget="mail_followers" groups="base.group_user"/>
+                       <field name="message_ids" widget="mail_thread"/>
+                    </div>
                 </form>
             </field>
         </record>

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from odoo import models, fields, api
 from odoo.exceptions import ValidationError
-from datetime import datetime,date,time
+from datetime import datetime,date,time,timedelta
 from dateutil.relativedelta import relativedelta
 
 MONEDA_SEGUROS_SEGUROS_VARIOS=[
@@ -163,7 +163,7 @@ class tvp_empleado(models.Model):
     nom_contacto=fields.Char('Nombre del contacto')
     tel_contacto=fields.Char('Tel. de contacto',size=10)
     fecha_ingreso=fields.Date('Fecha de ingreso',default=datetime.today())
-    edad=fields.Char(string='Edad',readonly=True)
+    edad=fields.Char(string='Edad')
     antiguedad=fields.Char(string='Antiguedad')
     antiguedad_inactive=fields.Char(string='Inactivo, antiguedad')
     tipo_sangre=fields.Selection(TIPO_SANGRE_EMPLEADO,'Tipo de sangre')
@@ -174,11 +174,13 @@ class tvp_empleado(models.Model):
     def calcula_edad(self):
         if self.birthday!=False:
             # formato_fecha="%Y-%m-%d"
-            # fecha_cumple=time.strptime(str(self.birthday),formato_fecha)
-            # fecha_actual=time.strptime(str(date.today()),formato_fecha)
+            # fecha_cumple=datetime.strptime(str(self.birthday),formato_fecha)
+            # fecha_actual=datetime.strptime(str(date.today()),formato_fecha)
             # resultado=fecha_actual[0]-fecha_cumple[0]
             # if fecha_actual[1]<fecha_cumple[1]:
-            #     resultado-=1
+            #     resultado-=resultado-timedelta(days=1)
+            # self.edad=(resultado/365)
+
             año_actual=str(date.today())
             año_birthday=str(self.birthday)
             resultado=int(año_actual[0:4])-int(año_birthday[0:4])
@@ -210,20 +212,20 @@ class tvp_empleado(models.Model):
 class tvp_contract(models.Model):
     _inherit = "hr.contract"
 
-    active = fields.Boolean('Contrato Activo', default=True)
+    active = fields.Boolean('Contrato Activo', default=True,track_visibility='onchange')
     meses_prestaciones = fields.Float('Prestaciones en Meses', help="Meses de Bonificación al Año según Nivel",track_visibility='onchange')
     sueldo_bruto_mensual = fields.Float('Sueldo Bruto Mensual',track_visibility='onchange')
     sueldo_bruto_anualp = fields.Float('SBA con Prestaciones', help="Sueldo Bruto anual con Prestaciones",track_visibility='onchange')
     sueldo_bruto_mensualp = fields.Float('SBM con Prestaciones', help="Sueldo Bruto Mensual con Prestaciones",track_visibility='onchange')
-    nivel_id = fields.Many2one('nivel.nivel', ondelete='restrict', string="Nivel del Puesto", index=True)
-    base_id = fields.Many2one('base.anual', ondelete='restrict', string="Base Anual", index=True)
-    compania_contratadora = fields.Many2one('res.company', ondelete='restrict', string="Empresa", index=True)
+    nivel_id = fields.Many2one('nivel.nivel', ondelete='restrict', string="Nivel del Puesto", index=True,track_visibility='onchange')
+    base_id = fields.Many2one('base.anual', ondelete='restrict', string="Base Anual", index=True,track_visibility='onchange')
+    compania_contratadora = fields.Many2one('res.company', ondelete='restrict', string="Empresa", index=True,track_visibility='onchange')
     motivo = fields.Selection([('aumento', 'Aumento de sueldo'),
                                ('cambio', 'Cambio de Puesto'),
                                ('renovacion', 'Renovación de Contrato'),
                                ('vencimiento', 'Vencimiento de Contrato'),
                                ('recorte', 'Recorte de Personal'),
-                               ('cancelacion', 'Cancelación de Contrato')],string='Motivo')
+                               ('cancelacion', 'Cancelación de Contrato')],string='Motivo',track_visibility='onchange')
     porcentaje = fields.Float(string='Porcentaje Aumentado', help="Porcentaje Aumentado",track_visibility='onchange')
     nuevo_sueldo = fields.Float(string='Nuevo SBM', help="Nuevo Sueldo Bruto Mensual que recibirá el empleado",track_visibility='onchange')
     monto = fields.Float(string='Monto Finiquitado', help="Monto entregado como liquidación o finiquito del contrato",track_visibility='onchange')
@@ -268,12 +270,13 @@ class Employee(models.Model):
 #----------------------------------MODELO CLASS ESCOLARIDAD PARA LA VISTA DE EMPLEADO------------------------------------------
 class Escolaridad(models.Model):
     _name = 'hr.escolaridad'
+    _inherit = ['mail.thread']
     _description = 'Escolaridad del Empleado'
 
-    name = fields.Char(string='Nombre del Estudio', required=True)
-    employee_id = fields.Many2one('hr.employee', string='Empleado', required=True)
-    nivel_estudio = fields.Selection(GRADO_ESTUDIOS_ESCOLARIDAD, string='Nivel de Estudios')
-    estado = fields.Selection(ESTADO_ESTUDIOS_ESCOLARIDAD, string='Estado de Estudios')
-    escuela = fields.Char(string='Nombre de la Escuela')
-    constancia_recibida = fields.Selection(CONSTANCIA_ESCOLARIDAD,string='Constancia Recibida')
-    notas = fields.Char('Notas')
+    name = fields.Char(string='Nombre del Estudio', required=True,track_visibility='onchange')
+    employee_id = fields.Many2one('hr.employee', string='Empleado', required=True,track_visibility='onchange')
+    nivel_estudio = fields.Selection(GRADO_ESTUDIOS_ESCOLARIDAD, string='Nivel de Estudios',track_visibility='onchange')
+    estado = fields.Selection(ESTADO_ESTUDIOS_ESCOLARIDAD, string='Estado de Estudios',track_visibility='onchange')
+    escuela = fields.Char(string='Nombre de la Escuela',track_visibility='onchange')
+    constancia_recibida = fields.Selection(CONSTANCIA_ESCOLARIDAD,string='Constancia Recibida',track_visibility='onchange')
+    notas = fields.Char('Notas',track_visibility='onchange')
