@@ -156,57 +156,50 @@ class Employee(models.Model):
 class tvp_empleado(models.Model):
     _inherit='hr.employee'
 
-    active = fields.Boolean('Empleado Activo', default=True)
-    curp=fields.Char(string='C.U.R.P',size=18,required=True)
-    rfc=fields.Char(string='R.F.C.',size=13,required=True)
-    nss=fields.Char(string='N.S.S.',size=11,required=True)
-    nom_contacto=fields.Char('Nombre del contacto')
-    tel_contacto=fields.Char('Tel. de contacto',size=10)
-    fecha_ingreso=fields.Date('Fecha de ingreso',default=datetime.today())
-    edad=fields.Char(string='Edad')
-    antiguedad=fields.Char(string='Antiguedad')
-    antiguedad_inactive=fields.Char(string='Inactivo, antiguedad')
-    tipo_sangre=fields.Selection(TIPO_SANGRE_EMPLEADO,'Tipo de sangre')
-    num_empleado=fields.Integer('Numero de empleado',required=True,size=4,help='Los numeros de empleado son de solo 4 DIGITOS.')
-    fecha_baja=fields.Date('Fecha de baja',help='Si lo requiere llene este campo con la fecha correspondiente a la baja...')
+    active = fields.Boolean('Empleado Activo', default=True, track_visibility='onchange')
+    curp=fields.Char(string='C.U.R.P',size=18,required=True, track_visibility='onchange')
+    rfc=fields.Char(string='R.F.C.',size=13,required=True, track_visibility='onchange')
+    nss=fields.Char(string='N.S.S.',size=11,required=True, track_visibility='onchange')
+    nom_contacto=fields.Char('Nombre del contacto', track_visibility='onchange')
+    tel_contacto=fields.Char('Tel. de contacto',size=10, track_visibility='onchange')
+    fecha_ingreso=fields.Date('Fecha de ingreso',default=datetime.today(), track_visibility='onchange')
+    edad=fields.Char(string='Edad', track_visibility='onchange')
+    antiguedad=fields.Char(string='Antiguedad', track_visibility='onchange')
+    antiguedad_inactive=fields.Char(string='Inactivo, antiguedad', track_visibility='onchange')
+    tipo_sangre=fields.Selection(TIPO_SANGRE_EMPLEADO,'Tipo de sangre', track_visibility='onchange')
+    num_empleado=fields.Integer('Numero de empleado',required=True,size=4,help='Los numeros de empleado son de solo 4 DIGITOS.', track_visibility='onchange')
+    fecha_baja=fields.Date('Fecha de baja',help='Si lo requiere llene este campo con la fecha correspondiente a la baja...', track_visibility='onchange')
 
     @api.onchange('birthday','edad')
     def calcula_edad(self):
         if self.birthday!=False:
-            # formato_fecha="%Y-%m-%d"
-            # fecha_cumple=datetime.strptime(str(self.birthday),formato_fecha)
-            # fecha_actual=datetime.strptime(str(date.today()),formato_fecha)
-            # resultado=fecha_actual[0]-fecha_cumple[0]
-            # if fecha_actual[1]<fecha_cumple[1]:
-            #     resultado-=resultado-timedelta(days=1)
-            # self.edad=(resultado/365)
-
-            año_actual=str(date.today())
-            año_birthday=str(self.birthday)
-            resultado=int(año_actual[0:4])-int(año_birthday[0:4])
-            if int(año_actual[5:7])<int(año_birthday[5:7]):
-                resultado-=1
+            formato_fecha="%Y-%m-%d"
+            fecha_cumple=datetime.strptime(str(self.birthday),formato_fecha)
+            fecha_actual=datetime.strptime(str(date.today()),formato_fecha)
+            resultado=abs(fecha_actual-fecha_cumple).days
+            resultado=int(resultado/365)
             self.edad=resultado
 
     @api.onchange('fecha_ingreso','antiguedad')
     def calcula_antiguedad(self):
         if self.fecha_ingreso!=False:
-            año_actual=str(date.today())
-            fecha_inicial=str(self.fecha_ingreso)
-            resultado = int(año_actual[0:4]) - int(fecha_inicial[0:4])
-            if int(año_actual[5:7]) < int(fecha_inicial[5:7]):
-                resultado -= 1
+            formato_fecha="%Y-%m-%d"
+            fecha_ingre=datetime.strptime(str(self.fecha_ingreso), formato_fecha)
+            fecha_actual=datetime.strptime(str(date.today()), formato_fecha)
+            resultado=abs(fecha_actual-fecha_ingre).days
+            resultado=int(resultado/365)
             self.antiguedad=resultado
 
     @api.onchange('antiguedad_inactive','fecha_ingreso','fecha_baja')
     def calc_fecha_final_antiguedad(self):
         if self.fecha_ingreso!=False and self.fecha_baja!=False:
-            año_actual=str(self.fecha_baja)
-            fecha_inicial=str(self.fecha_ingreso)
-            resultado = int(año_actual[0:4]) - int(fecha_inicial[0:4])
-            if int(año_actual[5:7]) < int(fecha_inicial[5:7]):
-                resultado -= 1
-            self.antiguedad_inactive=resultado
+            formato_fecha="%Y-%m-%d"
+            fecha_ingre = datetime.strptime(str(self.fecha_ingreso), formato_fecha)
+            fecha__de_baja = datetime.strptime(str(self.fecha_baja), formato_fecha)
+            resultado = abs(fecha__de_baja - fecha_ingre).days
+            resultado = int(resultado / 365)
+            self.antiguedad_inactive = resultado
+
 
 #---------------------CLASE PARA MODIFICACINO DE CONTRATOS--------------------------------------------------------
 class tvp_contract(models.Model):
