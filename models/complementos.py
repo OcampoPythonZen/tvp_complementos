@@ -173,11 +173,13 @@ class tvp_empleado(models.Model):
     @api.onchange('birthday','edad')
     def calcula_edad(self):
         if self.birthday!=False:
+
             formato_fecha="%Y-%m-%d"
             fecha_cumple=datetime.strptime(str(self.birthday),formato_fecha)
             fecha_actual=datetime.strptime(str(date.today()),formato_fecha)
-            resultado=abs(fecha_actual-fecha_cumple).days
-            resultado=int(resultado/365)
+            resultado=fecha_actual.year-fecha_cumple.year
+            if (fecha_actual.month and fecha_actual.day) > (fecha_cumple.month and fecha_cumple.day):
+                resultado-=1
             self.edad=resultado
 
     @api.onchange('fecha_ingreso','antiguedad')
@@ -186,8 +188,9 @@ class tvp_empleado(models.Model):
             formato_fecha="%Y-%m-%d"
             fecha_ingre=datetime.strptime(str(self.fecha_ingreso), formato_fecha)
             fecha_actual=datetime.strptime(str(date.today()), formato_fecha)
-            resultado=abs(fecha_actual-fecha_ingre).days
-            resultado=int(resultado/365)
+            resultado = fecha_actual.year - fecha_ingre.year
+            if (fecha_actual.month and fecha_actual.day) > (fecha_ingre.month and fecha_ingre.day):
+                resultado -= 1
             self.antiguedad=resultado
 
     @api.onchange('antiguedad_inactive','fecha_ingreso','fecha_baja')
@@ -196,7 +199,9 @@ class tvp_empleado(models.Model):
             formato_fecha="%Y-%m-%d"
             fecha_ingre = datetime.strptime(str(self.fecha_ingreso), formato_fecha)
             fecha__de_baja = datetime.strptime(str(self.fecha_baja), formato_fecha)
-            resultado = abs(fecha__de_baja - fecha_ingre).days,'dias'
+            resultado = fecha__de_baja.year - fecha_ingre.year
+            if (fecha__de_baja.month and fecha__de_baja.day) < (fecha_ingre.month and fecha_ingre.day):
+                resultado -= 1
             self.antiguedad_inactive = resultado
 
 
