@@ -196,8 +196,7 @@ class tvp_empleado(models.Model):
             formato_fecha="%Y-%m-%d"
             fecha_ingre = datetime.strptime(str(self.fecha_ingreso), formato_fecha)
             fecha__de_baja = datetime.strptime(str(self.fecha_baja), formato_fecha)
-            resultado = abs(fecha__de_baja - fecha_ingre).days
-            resultado = int(resultado / 365)
+            resultado = abs(fecha__de_baja - fecha_ingre).days,'dias'
             self.antiguedad_inactive = resultado
 
 
