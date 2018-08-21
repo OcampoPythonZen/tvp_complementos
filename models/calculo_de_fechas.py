@@ -1,10 +1,27 @@
-from datetime import date,timedelta,time,datetime
+import datetime
+
+class trato_de_fechas():
+
+    def __init__(self,formato,fecha_inicial,fecha_final):
+        self.formato='%Y-%m-%d'
+        self.fecha_inicial=datetime.datetime.strptime(fecha_inicial,formato)
+        self.fecha_final=datetime.datetime.strptime(fecha_final,formato)
+
+    def __str__(self):
+        return 'El formato de la fecha es: ' + self.formato \
+                 + ', el año de la fecha inicial es: ' + str(self.fecha_inicial.year) \
+                 + ', el año de la fecha final es: ' + str(self.fecha_final.year)
+
+    def __sub__(self):
+        return 'Tu edad es de: ' + str(self.fecha_final.year-self.fecha_inicial.year) + ' años'
 
 
-formato_fecha="%Y-%m-%d"
-fecha_nacimiento=datetime.strptime("1986-11-9",formato_fecha)
-fecha_actual=datetime.strptime("2018-8-13",formato_fecha)
-fecha_hector=datetime .strptime("1986-11-21",formato_fecha)
+obj=trato_de_fechas('%Y-%m-%d','1988-11-9','2018-8-15')
+print(obj)
+print(obj.__sub__())
 
-print((fecha_actual-fecha_hector))
+
+
+
+
 

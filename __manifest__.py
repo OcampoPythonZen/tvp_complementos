@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
 {
-    'name': "tvp_complementos",
+    'name': "TVPromo complementos",
 
     'summary': """
         Se requiere complementar y editar los apartados de Empleados y Contratos de
-        el área de Recursos Humanos""",
+        el área de Recursos Humanos y creación de nuevos módulos.""",
 
     'description': """
-        Complementos en el área de empleados y contratos de manera directa
+        Complementos en el área de RH ycreación de nuevos módulos.
     """,
 
-    'author': "TVPromo :: Edgar Ocampo",
+    'author': "TVPromo: Developer-Edgar Ocampo",
     'website': "http://www.tvp.mx",
 
     # Categories can be used to filter modules in modules listing
